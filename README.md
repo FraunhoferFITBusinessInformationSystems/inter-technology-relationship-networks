@@ -25,7 +25,12 @@ To be added
 To be added 
 
 ## Requirements
-To be added 
+* sklearn
+* gensim
+* pandas
+* pytrends
+* lxml
+* tabulate
 
 ## Contributors' Affiliations
 
