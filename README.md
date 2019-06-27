@@ -1,4 +1,4 @@
-# inter-technology-relationship-networks
+# Inter-technology Relationship Networks
 
 Research project to create and analyze inter-technology relationship networks 
 
@@ -35,4 +35,4 @@ To be added
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## License
-This OpenSource project is based on the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+This OpenSource project is based on the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.
