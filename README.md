@@ -40,7 +40,7 @@ To be added
 * FIM Research Center, University of Bayreuth, Wittelsbacherring 10, 95444 Bayreuth, Germany
 
 ## Contributing
-Please read [CONTRIBUTING.md](CONTRIBUTING) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## License
 This OpenSource project is based on the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
