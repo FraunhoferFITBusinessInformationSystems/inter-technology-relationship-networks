@@ -34,10 +34,10 @@ To be added
 
 ## Contributors' Affiliations
 
-Project Group Business & Information Systems Engineering of the Fraunhofer FIT, Wittelsbacherring 10, 95444 Bayreuth, Germany
-FIM Research Center, University of Augsburg, 86135 Augsburg, Germany
-Project Group Business & Information Systems Engineering of the Fraunhofer FIT, Universitätsstraße 12, 86159 Augsburg, Germany
-FIM Research Center, University of Bayreuth, Wittelsbacherring 10, 95444 Bayreuth, Germany
+* Project Group Business & Information Systems Engineering of the Fraunhofer FIT, Wittelsbacherring 10, 95444 Bayreuth, Germany
+* FIM Research Center, University of Augsburg, 86135 Augsburg, Germany
+* Project Group Business & Information Systems Engineering of the Fraunhofer FIT, Universitätsstraße 12, 86159 Augsburg, Germany
+* FIM Research Center, University of Bayreuth, Wittelsbacherring 10, 95444 Bayreuth, Germany
 
 ## Contributing
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
