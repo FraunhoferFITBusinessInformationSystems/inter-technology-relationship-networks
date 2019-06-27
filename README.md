@@ -2,18 +2,10 @@
 
 Research project to create and analyze inter-technology relationship networks 
 
-## Table of Contents
-
-* [Installation](doc/installation.md)
-* [Usage](doc/installation.md#Usage)
-* [Documentation](doc/documentation.md)
-  * [Architecture](doc/documentation.md#Architecture)
-  * [Components](doc/documentation.md#Components)
-* [Contributing](CONTRIBUTING.md)
-
 ## Description
 We develop an analytical method to generate technology-related network data that retraces elapsed patterns of technological change. We consider the technological distances that characterize technologies' proximities and dependencies. We use established text mining techniques and draw from technology innovation research as justificatory knowledge. The proposed method processes textual data from different information sources into an analyzable and readable inter-technology relationship network. An inter-technology relationship network has the following elements:
 
+<img width="600" alt="ITRN_Scheme" src="https://raw.githubusercontent.com/FraunhoferFITBusinessInformationSystems/inter-technology-relationship-networks/master/doc/itrn_scheme.png"> 
 
 ## Research paper
 Hofmann, P., Keller, R., Urbach, N., 2019. Inter-technology relationship networks: Arranging technologies through text mining. Technological Forecasting & Social Change. 143. 202-213. https://doi.org/10.1016/j.techfore.2019.02.009
