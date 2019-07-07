@@ -10,19 +10,8 @@ We develop an analytical method to generate technology-related network data that
 ## Research paper
 Hofmann, P., Keller, R., Urbach, N., 2019. Inter-technology relationship networks: Arranging technologies through text mining. Technological Forecasting & Social Change. 143. 202-213. https://doi.org/10.1016/j.techfore.2019.02.009
 
-## Installation
-To be added 
-
 ## Example
-To be added 
-
-## Requirements
-* sklearn
-* gensim
-* pandas
-* pytrends
-* lxml
-* tabulate
+You can find an examplary pipeline [here](/examples/example_pipeline.py). 
 
 ## Contributors' Affiliations
 
