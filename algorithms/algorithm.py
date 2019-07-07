@@ -29,7 +29,7 @@ class Algorithm:
         self.logfile_path = logfile_path
         self.start_time = None
 
-    def run(self, assets, nodes, results, year=0):
+    def run(self, nodes, results, year=0):
         """virtual method to run the algorithm"""
         raise NotImplementedError()
 
@@ -37,25 +37,6 @@ class Algorithm:
     def calc_similarity(vector1, vector2):
         result = cosine_similarity(vector1, vector2)
         return result[0][0]
-
-    @staticmethod
-    def get_words_from_node(node, year):
-        try:
-            for asset in node.assets[year]:
-                for word in asset.words_to_analyze():
-                    yield word
-        except KeyError:
-            return
-        return
-
-    @staticmethod
-    def get_words_from_node_cumulative(node, year_cum):
-        for year in node.assets:
-            if year <= year_cum:
-                for asset in node.assets[year]:
-                    for word in asset.words_to_analyze():
-                        yield word
-        return
 
     def get_documents_from_nodelist(self, node_list, year):
         """ get a list of words for all assets belonging to each node in the node_list
@@ -76,9 +57,9 @@ class Algorithm:
         all_documents = []
         for node in node_list:
             if self.cumulative:
-                words = self.get_words_from_node_cumulative(node, year)
+                words = node.get_words_cumulative(year)
             else:
-                words = self.get_words_from_node(node, year)
+                words = node.get_words(year)
             all_documents.append(words)
         return all_documents
 

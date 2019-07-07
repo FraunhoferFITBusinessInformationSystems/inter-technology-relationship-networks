@@ -25,6 +25,14 @@ class Asset:
     def asset_type(self):
         return "Asset"
 
+    def matches_any_node(self):
+        """check if the asset matches any node
+        Returns
+        -------
+        true if asset matches any node
+        """
+        return self.node_names is not None and len(self.node_names) > 0
+
     def words_to_analyze(self):
         """virtual method to retrieve the words that have to be analyzed"""
         return []
@@ -41,12 +49,34 @@ class Asset:
         -------
         None
         """
-        found_node_names = {}
+        found_node_words = {}
         for word in self.words_to_analyze():
-            found_node = nodes.get_node_by_synonym(word)
-            if found_node is not None and found_node_names.get(found_node, '') is '':
-                found_node_names[found_node] = found_node.name
-        self.node_names = list(found_node_names.values())
+            found_nodes = nodes.get_nodes_by_synonym(word)
+            if found_nodes is not None:
+                for node in found_nodes:
+                    if node not in found_node_words:
+                        found_node_words[node] = {}
+                    node_words = found_node_words[node]
+                    if word not in node_words:
+                        node_words[word] = 0
+        # evaluate boolean conditions
+        self.node_names = []
+        for node in found_node_words.keys():
+            if node.node_matches_found_synonyms(found_node_words[node]):
+                self.node_names.append(node.name)
+
+
+class AssetWords(Asset):
+    def __init__(self, year, asset):
+        Asset.__init__(self, year)
+        self.words = asset.words_to_analyze()
+        self.node_names = asset.node_names
+
+    def asset_type(self):
+        return "AssetWords"
+
+    def words_to_analyze(self):
+        return self.words
 
 
 class SentenceLemmatizedAcademicAsset(Asset):
@@ -240,33 +270,7 @@ def filter_assetlist_by_start_year(assetlist, year):
     return newlist
 
 
-def get_years(assetlist):
-    """Creates a list of years.
-
-    Determines the earliest as well as the latest year in the given assetlist and
-    returns a list of years with the minimum and maximum values as boundaries.
-
-    Parameters
-    ----------
-    assetlist : list(assets.Asset object)
-        Specifies the list which is used to extract the earliest as well as latest year.
-
-    Returns
-    -------
-    range_of_years : list(int)
-    """
-
-    years = []
-    for asset in assetlist:
-        if asset.year not in years:
-            years.append(asset.year)
-    min_year = min(int(i) for i in years)
-    max_year = max(int(i) for i in years)
-    range_of_years = range(min_year, max_year+1)
-    return range_of_years
-
-
-class asset_word_iterator(collections.Iterator):
+class AssetWordIterator(collections.Iterator):
     def __init__(self, assetlist):
         self.index = -1
         self.assetlist = assetlist

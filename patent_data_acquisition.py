@@ -3,16 +3,12 @@
 """
 
 # standard library imports
-import os
 import sys
-import itertools
 
 # related third party imports
-import timeit
 from multiprocessing import Pool, cpu_count
 
 # local application/library specific imports
-from assets import *
 from preprocessing_methods import *
 from logfile import append_logfile
 
@@ -37,6 +33,7 @@ def stream_preprocessing(stream_processing_job):
     remove_stopwords = stream_processing_job.get('remove_stopwords')
     filter_patents_by_node = stream_processing_job.get('filter_patents_by_node')
     nlp = NLP(nodes_to_analyze)
+    filtered_out = 0
 
     start = timeit.default_timer()
 
@@ -97,14 +94,17 @@ def stream_preprocessing(stream_processing_job):
                         lemmatized_sentence = nlp.list_based_stopword_removal(lemmatized_sentence)
                     description_sentences_with_lemmas.append(lemmatized_sentence)
 
-                j = SentenceLemmatizedPatentAsset(
+                asset = SentenceLemmatizedPatentAsset(
                     year=year, nodes=nodes_to_analyze, title_sentences=title_sentences_with_lemmas,
                     abstract_sentences=abstract_sentences_with_lemmas,
                     claims_sentences=claims_sentences_with_lemmas,
                     description_sentences=description_sentences_with_lemmas,
                     assignees=assignees, cpc=cpc, ipc=ipc)
 
-                assets.append(j)
+                if asset.matches_any_node():
+                    assets.append(asset)
+                else:
+                    filtered_out = filtered_out + 1
 
         # Word Tokenize
         elif preprocessing == "word_tokenize":
@@ -127,13 +127,16 @@ def stream_preprocessing(stream_processing_job):
                     tokenized_claims = nlp.list_based_stopword_removal(tokenized_claims)
                     tokenized_description = nlp.list_based_stopword_removal(tokenized_description)
 
-                j = WordTokenizedPatentAsset(year=year, nodes=nodes_to_analyze,
+                asset = WordTokenizedPatentAsset(year=year, nodes=nodes_to_analyze,
                                              tokenized_title=tokenized_title,
                                              tokenized_abstract=tokenized_abstract,
                                              tokenized_claims=tokenized_claims,
                                              tokenized_description=tokenized_description,
                                              assignees=assignees, cpc=cpc, ipc=ipc)
-                assets.append(j)
+                if asset.matches_any_node():
+                    assets.append(asset)
+                else:
+                    filtered_out = filtered_out + 1
 
         # Pos Tagging (to do)
         elif preprocessing == "pos_tag":
@@ -147,13 +150,16 @@ def stream_preprocessing(stream_processing_job):
                 pos_tagged_claims = nlp.list_based_stopword_removal_for_pos_tagged_words(pos_tagged_claims)
                 pos_tagged_description = nlp.list_based_stopword_removal_for_pos_tagged_words(pos_tagged_description)
 
-            j = PosTaggedPatentAsset(year=year, nodes=nodes_to_analyze,
+            asset = PosTaggedPatentAsset(year=year, nodes=nodes_to_analyze,
                                      pos_tagged_title=pos_tagged_title,
                                      pos_tagged_abstract=pos_tagged_abstract,
                                      pos_tagged_claims=pos_tagged_claims,
                                      pos_tagged_description=pos_tagged_description,
                                      assignees=assignees, cpc=cpc, ipc=ipc)
-            assets.append(j)
+            if asset.matches_any_node():
+                assets.append(asset)
+            else:
+                filtered_out = filtered_out + 1
 
         # Lemmatize
         elif preprocessing == "lemmatize":
@@ -176,14 +182,17 @@ def stream_preprocessing(stream_processing_job):
                     lemmatized_claims = nlp.list_based_stopword_removal(lemmatized_claims)
                     lemmatized_description = nlp.list_based_stopword_removal(lemmatized_description)
 
-                j = LemmatizedPatentAsset(year=year, nodes=nodes_to_analyze,
+                asset = LemmatizedPatentAsset(year=year, nodes=nodes_to_analyze,
                                           lemmatized_title=lemmatized_title,
                                           lemmatized_abstract=lemmatized_abstract,
                                           lemmatized_claims=lemmatized_claims,
                                           lemmatized_description=lemmatized_description,
                                           assignees=assignees, cpc=cpc, ipc=ipc)
 
-                assets.append(j)
+                if asset.matches_any_node():
+                    assets.append(asset)
+                else:
+                    filtered_out = filtered_out + 1
 
         else:
             sys.exit("Pipeline should never reach this point!")
@@ -192,7 +201,8 @@ def stream_preprocessing(stream_processing_job):
     stop = timeit.default_timer()
     runtime = stop - start
     print('Finished: ' + file_path + " with: " + str(len(assets)) +
-          ' Assets found in ' + str(len(patent_file)) + ' patents. Duration: ' + str(runtime))
+          ' Assets found in ' + str(len(patent_file)) + ' patents. Duration: ' + str(runtime) +
+          ' ' + str(filtered_out) + ' assets filtered out by search expressions')
     return assets
 
 
@@ -224,7 +234,7 @@ class PatentData:
 
         Returns
         -------
-        assets : list(Asset)
+        nothing
 
         """
         start = timeit.default_timer()
@@ -244,21 +254,23 @@ class PatentData:
                     print("Empty File!")
 
         p = Pool(processes=cpu_count()-1, maxtasksperchild=1)
-        assets = p.map(stream_preprocessing, stream_processing_jobs)
+        asset_cnt = 0
+        for assets in p.imap_unordered(stream_preprocessing, stream_processing_jobs):
+            nodes_to_analyze.enrich_with_assets(assets)
+            print("Imported " + str(len(assets)) + " assets into nodes")
+            asset_cnt = asset_cnt + len(assets)
         p.close()
         p.join()
-        assets = list(itertools.chain.from_iterable(assets))
 
         # Logfile
         stop = timeit.default_timer()
         runtime = stop - start
         event_title = "Load and preprocess Patent Data from Directory"
         event_description = \
-            "Importing " + str(len(assets)) + " patents from directory " \
+            "Importing " + str(asset_cnt) + " patents from directory " \
                                               "into assetlist." \
             + " Preprocessing = " + str(preprocessing)
         append_logfile(logfile_path=self.logfile_path,
                        event_title=event_title,
                        event_description=event_description,
                        runtime=runtime)
-        return assets

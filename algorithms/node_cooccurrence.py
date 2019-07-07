@@ -10,19 +10,17 @@
 
 # local application/library specific imports
 from algorithms.algorithm import *
-from assets import get_years
 
 
 class NodeCoOccurrence(Algorithm):
     def __init__(self, cumulative=True, logfile_path=None):
         Algorithm.__init__(self, 'node_cooc', cumulative, logfile_path)
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Word Co-Occurrence Algorithm.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -41,7 +39,7 @@ class NodeCoOccurrence(Algorithm):
         # done only for the years specified as arguments
         years_to_evaluate = years
         if years_to_evaluate is None or self.cumulative:
-            years_to_evaluate = get_years(asset_list)
+            years_to_evaluate = nodes.get_years()
 
         if years is None:
             needed_result_years = {year: 0 for year in years_to_evaluate}
@@ -49,22 +47,25 @@ class NodeCoOccurrence(Algorithm):
             needed_result_years = {year: 0 for year in years}
 
         nodelist = nodes.nodelist
+
+        # create empty result dict
+        for node in nodelist:
+            for year in years_to_evaluate:
+                for other_node in nodelist:
+                    count[(year, node, other_node)] = 0
+
         # creates results for each year
-        for i in range(0, len(nodelist)):
-            node_1 = nodelist[i]
-            for a in range(i+1, len(nodelist)):
-                node_2 = nodelist[a]
-                for year in years_to_evaluate:
-                    count[(year, node_1, node_2)] = 0
-                    try:
-                        for asset in node_1.assets[year]:
-                            if asset in node_2.assets[year]:
-                                if (year, node_1, node_2) in count:
-                                    count[(year, node_1, node_2)] = count[(year, node_1, node_2)] + 1
-                                else:
-                                    count[(year, node_1, node_2)] = 1
-                    except KeyError:
-                        continue
+        for node in nodelist:
+            for year in years_to_evaluate:
+                if year not in node.asset_count:
+                    continue
+                for asset in node.get_assets(year):
+                    if asset.node_names is None:
+                        asset.find_nodes(nodes)
+                    for other_node_name in asset.node_names:
+                        if other_node_name != node.name:
+                            count[(year, node, nodes.nodes[other_node_name])] = \
+                                count[(year, node, nodes.nodes[other_node_name])] + 1
         result_count = count
         if self.cumulative:
             result_count = self.cumulate_count(count, years_to_evaluate)

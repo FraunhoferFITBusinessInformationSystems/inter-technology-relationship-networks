@@ -72,11 +72,12 @@ def stream_preprocessing(stream_processing_job):
                 if remove_stopwords == "Nltk-Stopwords":
                     lemmatized_sentence = nlp.list_based_stopword_removal(lemmatized_sentence)
                 abstract_sentences_with_lemmas.append(lemmatized_sentence)
-            j = SentenceLemmatizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
+            asset = SentenceLemmatizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
                                                 title_sentences=title_sentences_with_lemmas,
                                                 abstract_sentences=abstract_sentences_with_lemmas,
                                                 keywords=keywords)
-            assets.append(j)
+            if asset.matches_any_node():
+                assets.append(asset)
 
         elif preprocessing == "word_tokenize":
             tokenized_title = nlp.tokenize_into_words(title)
@@ -85,11 +86,12 @@ def stream_preprocessing(stream_processing_job):
                 tokenized_title = nlp.list_based_stopword_removal(tokenized_title)
                 tokenized_abstract = nlp.list_based_stopword_removal(tokenized_abstract)
 
-            j = WordTokenizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
+            asset = WordTokenizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
                                            tokenized_title=tokenized_title,
                                            tokenized_abstract=tokenized_abstract,
                                            keywords=keywords)
-            assets.append(j)
+            if asset.matches_any_node():
+                assets.append(asset)
 
         elif preprocessing == "pos_tag":
             pos_tagged_title = nlp.pos_tag_words(title)
@@ -98,11 +100,12 @@ def stream_preprocessing(stream_processing_job):
                 pos_tagged_title = nlp.list_based_stopword_removal_for_pos_tagged_words(pos_tagged_title)
                 pos_tagged_abstract = nlp.list_based_stopword_removal_for_pos_tagged_words(pos_tagged_abstract)
 
-            j = PosTaggedAcademicAsset(year=year, nodes=[], authors=author,
+            asset = PosTaggedAcademicAsset(year=year, nodes=[], authors=author,
                                        pos_tagged_title=pos_tagged_title,
                                        pos_tagged_abstract=pos_tagged_abstract,
                                        keywords=keywords)
-            assets.append(j)
+            if asset.matches_any_node():
+                assets.append(asset)
 
         elif preprocessing == "lemmatize":
             lemmatized_title = nlp.lemmatize_words(title)
@@ -111,11 +114,12 @@ def stream_preprocessing(stream_processing_job):
                 lemmatized_title = nlp.list_based_stopword_removal(lemmatized_title)
                 lemmatized_abstract = nlp.list_based_stopword_removal(lemmatized_abstract)
 
-            j = LemmatizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
+            asset = LemmatizedAcademicAsset(year=year, nodes=nodes_to_analyze, authors=author,
                                         lemmatized_title=lemmatized_title,
                                         lemmatized_abstract=lemmatized_abstract,
                                         keywords=keywords)
-            assets.append(j)
+            if asset.matches_any_node():
+                assets.append(asset)
 
         else:
             sys.exit("Pipeline should never reach this point!")

@@ -13,19 +13,17 @@ from sklearn.preprocessing import Normalizer
 
 # local application/library specific imports
 from algorithms.algorithm import *
-from assets import get_years
 
 
 class BagOfWords(Algorithm):
     def __init__(self, cumulative=True, logfile_path=None):
         Algorithm.__init__(self, 'BagOfWords', cumulative, logfile_path)
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Bag of Words Algorithm.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -40,7 +38,7 @@ class BagOfWords(Algorithm):
         """
         self.start_timer()
         if years is None:
-            years = get_years(asset_list)
+            years = nodes.get_years()
         nodelist = nodes.nodelist
         for year in years:
             all_documents = self.get_documents_from_nodelist(nodelist, year)
@@ -57,12 +55,11 @@ class BagOfWords_Tfidf(Algorithm):
     def __init__(self, cumulative=True, logfile_path=None):
         Algorithm.__init__(self, 'BagOfWords_Tfidf', cumulative, logfile_path)
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Bag of Words Algorithm with evaluated term frequencies.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -77,7 +74,7 @@ class BagOfWords_Tfidf(Algorithm):
         """
         self.start_timer()
         if years is None:
-            years = get_years(asset_list)
+            years = nodes.get_years()
         nodelist = nodes.nodelist
         for year in years:
             all_documents = self.get_documents_from_nodelist(nodelist, year)
@@ -94,12 +91,11 @@ class SVD_BagOfWords(Algorithm):
     def __init__(self, cumulative=True, logfile_path=None):
         Algorithm.__init__(self, 'SVD_BagOfWords', cumulative, logfile_path)
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Bag of Words Algorithm.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -114,7 +110,7 @@ class SVD_BagOfWords(Algorithm):
         """
         self.start_timer()
         if years is None:
-            years = get_years(asset_list)
+            years = nodes.get_years()
         nodelist = nodes.nodelist
         if len(nodelist) < 200:
             dim = int(len(nodelist) / 2)
@@ -144,12 +140,11 @@ class SVD_BagOfWords_Tfidf(Algorithm):
     def __init__(self, cumulative=True, logfile_path=None):
         Algorithm.__init__(self, 'SVD_BagOfWords_Tfidf', cumulative, logfile_path)
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Bag of Words Algorithm with evaluated term frequencies.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -164,7 +159,7 @@ class SVD_BagOfWords_Tfidf(Algorithm):
         """
         self.start_timer()
         if years is None:
-            years = get_years(asset_list)
+            years = nodes.get_years()
         nodelist = nodes.nodelist
         if len(nodelist) < 200:
             dim = int(len(nodelist) / 2)

@@ -10,13 +10,11 @@ from gensim import models
 
 # local application/library specific imports
 from algorithms.algorithm import *
-from assets import get_years
 
 
 class Doc2vecIterator(collections.Iterator):
     def __init__(self, nodelist, cumulative, year):
         self.node_index = 0
-        self.asset_index = 0
         self.cumulative = cumulative
         self.year = year
         self.nodelist = nodelist
@@ -25,42 +23,43 @@ class Doc2vecIterator(collections.Iterator):
 
     @staticmethod
     def get_assets_from_node_cumulative(node, year_cum):
-        for year in node.assets:
+        for year in node.asset_count:
             if year <= year_cum:
-                for asset in node.assets[year]:
+                for asset in node.get_assets(year):
                     yield asset
         return
 
     @staticmethod
     def get_assets_from_node(node, year):
-        for asset in node.assets[year]:
+        for asset in node.get_assets(year):
             yield asset
         return
 
     def get_assets(self):
         if self.cumulative:
-            return list(self.get_assets_from_node_cumulative(self.node, self.year))
+            return self.get_assets_from_node_cumulative(self.node, self.year).__iter__()
         else:
-            return list(self.get_assets_from_node(self.node, self.year))
+            return self.get_assets_from_node(self.node, self.year).__iter__()
 
     def __iter__(self):
         return self
 
     def next(self):
-        while self.asset_index == len(self.assets) and self.node_index < len(self.nodelist):
-            # switch to next node
-            self.node_index = self.node_index + 1
-            if self.node_index < len(self.nodelist):
+        try:
+            asset = self.assets.__next__()
+            wordlist = asset.words_to_analyze()
+            return models.doc2vec.TaggedDocument(words=wordlist, tags=['%s' % self.node.name])
+
+        except StopIteration:
+            if self.node_index < len(self.nodelist)-1:
+                # switch to next node
+                self.node_index = self.node_index + 1
                 self.node = self.nodelist[self.node_index]
                 self.assets = self.get_assets()
-                self.asset_index = 0
-        if self.asset_index < len(self.assets):
-            wordlist = self.assets[self.asset_index].words_to_analyze()
-            self.asset_index = self.asset_index + 1
-            return models.doc2vec.TaggedDocument(words=wordlist, tags=['%s' % self.node.name])
-        else:
-            # Iterators must raise when done, else considered broken
-            raise StopIteration
+                return self.next()
+            else:
+                # Iterators must raise when done, else considered broken
+                raise StopIteration
 
     __next__ = next  # Python 3 compatibility
 
@@ -71,12 +70,11 @@ class Doc2Vec(Algorithm):
         self.window = window
         self.epochs = epochs
 
-    def run(self, asset_list, nodes, results, years=None):
+    def run(self, nodes, results, years=None):
         """ Runs the Bag of Words Algorithm.
 
         Parameters
         ----------
-        asset_list : list of Asset
         nodes : Nodes
             Specifies the nodes to be analyzed (input parameter).
         results : results.Results object
@@ -91,7 +89,7 @@ class Doc2Vec(Algorithm):
         """
         self.start_timer()
         if years is None:
-            years = get_years(asset_list)
+            years = nodes.get_years()
         nodelist = nodes.nodelist
         for year in years:
             model = models.Doc2Vec(window=self.window, alpha=0.025, min_alpha=0.025)  # use fixed learning rate
